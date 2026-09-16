@@ -121,10 +121,10 @@
 <body class="flex flex-col justify-between min-h-screen text-slate-800">
 
     <!-- Banner si es carrega un treball compartit -->
-    <div id="sharedNotice" class="hidden bg-emerald-600 text-white text-xs sm:text-sm font-semibold py-2 px-4 text-center flex items-center justify-center gap-2 shadow-inner">
+    <div id="sharedNotice" class="hidden bg-emerald-600 text-white text-xs sm:text-sm font-semibold py-2.5 px-4 text-center flex items-center justify-center gap-2 shadow-inner z-50">
         <i class="fa-solid fa-graduation-cap text-base"></i>
-        <span>Estàs veient el treball compartit d'un alumne!</span>
-        <button onclick="clearSharedData()" class="ml-3 underline bg-emerald-700 hover:bg-emerald-800 px-2.5 py-0.5 rounded-lg text-xs">Carregar versió inicial</button>
+        <span><strong>MODE REVISIÓ DEL PROFESSOR:</strong> Estàs veient el treball rebut d'un alumne!</span>
+        <button onclick="clearSharedData()" class="ml-3 underline bg-emerald-700 hover:bg-emerald-800 px-3 py-1 rounded-lg text-xs font-bold transition-all">Restablir activitat buida</button>
     </div>
 
     <!-- Canva App Header -->
@@ -407,7 +407,7 @@
             </div>
             <h3 class="font-display font-extrabold text-lg text-slate-800">Enllaç Copiat al Portapapers!</h3>
             <p class="text-xs text-slate-600 leading-relaxed">
-                El teu treball (les teves afirmacions i on les has posicionat) s'ha convertit en un enllaç. Ara només l'has d'**enganxar (Ctrl+V)** a la teva tasca de Classroom, Moodle o correu per enviar-ho al professor.
+                El teu treball s'ha convertit en un enllaç. Ara només l'has d'**enganxar (Ctrl+V)** a Classroom, Moodle o correu per enviar-ho al professor.
             </p>
             <input type="text" id="shareUrlInput" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-600 outline-none select-all text-center font-mono">
             <button onclick="closeShareModal()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md">
@@ -423,6 +423,19 @@
     </div>
 
     <script>
+        // Funcions d'utilitat per codificar/descodificar UTF-8 en Base64 de forma segura en qualsevol navegador
+        function utf8ToBase64(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
+        }
+
+        function base64ToUtf8(str) {
+            return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
+
         let initialCards = [
             { id: "c1", type: "calcul", text: "Treure un 6 amb un dau normal", icon: "🎲", targetValue: 17, minValid: 10, maxValid: 25, hint: "CÀLCUL: Hi ha 1 cara favorable de 6 totals (1/6 ≈ 16.7%).", explanation: "1/6 = 16.7% (Càlcul matemàtic teòric)." },
             { id: "c2", type: "calcul", text: "Treure vermell de la bossa de l’act.1", icon: "🛍️", targetValue: 75, minValid: 65, maxValid: 85, hint: "CÀLCUL: A la bossa de l'activitat 1 hi ha majoria de boles vermelles (75%).", explanation: "75% segons la composició de la bossa." },
@@ -435,7 +448,7 @@
             { id: "c9", type: "estimacio", text: "El trimestre vinent tothom aprovarà les matemàtiques", icon: "📐", targetValue: 30, minValid: 5, maxValid: 80, suggestedFactors: ["Esforç i estudi de la classe", "Dificultat dels temes", "Assistència a classe", "Ajuda / Atenció a la diversitat"], hint: "ESTIMACIÓ: Depèn de l'esforç individual, el treball en equip, la dificultat del tema...", explanation: "Estimació contingents a factors humans (esforç, estudi, dificultat)." }
         ];
 
-        let cards = [...initialCards];
+        let cards = JSON.parse(JSON.stringify(initialCards));
         let cardPercentages = {};
         let cardNotes = {};
         let cardFactors = {};
@@ -454,19 +467,23 @@
 
             if (dataParam) {
                 try {
-                    const decoded = JSON.parse(decodeURIComponent(escape(atob(dataParam))));
+                    const decodedJson = base64ToUtf8(decodeURIComponent(dataParam));
+                    const decoded = JSON.parse(decodedJson);
+                    
                     if (decoded && decoded.cards) {
                         cards = decoded.cards;
                         cardPercentages = decoded.percentages || {};
                         cardNotes = decoded.notes || {};
                         cardFactors = decoded.factors || {};
+                        
                         document.getElementById('sharedNotice').classList.remove('hidden');
                         renderAll();
-                        showToast("Treball d'alumne carregat correctament", "success");
+                        showToast("Treball d'alumne carregat en Mode Revisió", "success");
                         return;
                     }
                 } catch(e) {
-                    console.error("Error en carregar les dades de l'URL", e);
+                    console.error("Error en llegir dades de l'URL", e);
+                    showToast("No s'han pogut carregar les dades de l'enllaç.", "warning");
                 }
             }
             resetCards();
@@ -475,7 +492,7 @@
         function clearSharedData() {
             window.history.replaceState({}, document.title, window.location.pathname);
             document.getElementById('sharedNotice').classList.add('hidden');
-            cards = [...initialCards];
+            cards = JSON.parse(JSON.stringify(initialCards));
             resetCards();
         }
 
@@ -489,17 +506,21 @@
 
             try {
                 const jsonString = JSON.stringify(payload);
-                const encoded = btoa(unescape(encodeURIComponent(jsonString)));
-                const shareUrl = `${window.location.origin}${window.location.pathname}?work=${encoded}`;
+                const encodedB64 = utf8ToBase64(jsonString);
+                const safeEncoded = encodeURIComponent(encodedB64);
+                
+                const shareUrl = `${window.location.origin}${window.location.pathname}?work=${safeEncoded}`;
 
                 navigator.clipboard.writeText(shareUrl).then(() => {
                     document.getElementById('shareUrlInput').value = shareUrl;
                     document.getElementById('shareModal').classList.remove('hidden');
                 }).catch(() => {
-                    prompt("Copia aquest enllaç per enviar-lo al professor:", shareUrl);
+                    document.getElementById('shareUrlInput').value = shareUrl;
+                    document.getElementById('shareModal').classList.remove('hidden');
                 });
             } catch (e) {
-                showToast("Hi ha hagut un error en generar l'enllaç.", "warning");
+                console.error("Error generant l'enllaç", e);
+                showToast("Error en generar l'enllaç compartit.", "warning");
             }
         }
 
@@ -541,24 +562,20 @@
                 const isSelected = selectedCardId === card.id;
                 const isCalcul = card.type === 'calcul';
                 const cardDiv = document.createElement('div');
-                cardDiv.className = `certainty-card bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-1 text-xs sm:text-sm font-semibold text-slate-800 ${isSelected ? 'selected' : ''}`;
+                cardDiv.className = `certainty-card bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all flex items-center gap-2 max-w-xs text-xs font-semibold ${isSelected ? 'selected' : ''}`;
                 cardDiv.onclick = (e) => {
                     e.stopPropagation();
                     selectCard(card.id);
                 };
 
-                const badgeHtml = isCalcul 
-                    ? `<span class="badge-calcul text-[10px] font-bold px-2 py-0.5 rounded-md self-start flex items-center gap-1"><i class="fa-solid fa-calculator"></i> Càlcul</span>`
-                    : `<span class="badge-estimacio text-[10px] font-bold px-2 py-0.5 rounded-md self-start flex items-center gap-1"><i class="fa-solid fa-cloud-sun"></i> Estimació Variable</span>`;
+                const badgeClass = isCalcul ? 'badge-calcul' : 'badge-estimacio';
+                const badgeLabel = isCalcul ? 'Càlcul' : 'Estimació';
 
                 cardDiv.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="text-lg">${card.icon}</span>
-                        <span class="leading-tight flex-grow">${card.text}</span>
-                    </div>
-                    <div class="flex justify-between items-center mt-1">
-                        ${badgeHtml}
-                        ${cardNotes[card.id] || (cardFactors[card.id] && cardFactors[card.id].length) ? '<i class="fa-solid fa-comment text-purple-500 text-xs" title="Té explicació / factors"></i>' : ''}
+                    <span class="text-xl select-none">${card.icon || '📌'}</span>
+                    <div class="flex-grow min-w-0">
+                        <div class="font-bold text-slate-800 truncate">${card.text}</div>
+                        <span class="${badgeClass} text-[10px] px-1.5 py-0.5 rounded font-extrabold inline-block mt-0.5">${badgeLabel}</span>
                     </div>
                 `;
                 bankEl.appendChild(cardDiv);
@@ -566,99 +583,108 @@
         }
 
         function renderSpectrumLine() {
-            const pinnedArea = document.getElementById('pinnedCardsArea');
-            pinnedArea.innerHTML = '';
+            const area = document.getElementById('pinnedCardsArea');
+            area.innerHTML = '';
 
-            const placedCards = cards.filter(c => cardPercentages[c.id] !== null && cardPercentages[c.id] !== undefined);
-            placedCards.sort((a, b) => cardPercentages[a.id] - cardPercentages[b.id]);
+            const pinnedCards = cards.filter(c => cardPercentages[c.id] !== null && cardPercentages[c.id] !== undefined);
 
-            const verticalTiers = [];
+            const groups = {};
+            pinnedCards.forEach(card => {
+                const pct = cardPercentages[card.id];
+                const key = Math.round(pct / 3) * 3; 
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(card);
+            });
 
-            placedCards.forEach((card) => {
+            pinnedCards.forEach(card => {
                 const pct = cardPercentages[card.id];
                 const isCalcul = card.type === 'calcul';
+                const hasNote = cardNotes[card.id] && cardNotes[card.id].trim().length > 0;
+                
+                const key = Math.round(pct / 3) * 3;
+                const indexInGroup = groups[key].indexOf(card);
+                const topOffset = indexInGroup * 60;
 
-                let tier = 0;
-                while (verticalTiers[tier] && Math.abs(verticalTiers[tier] - pct) < 12) {
-                    tier++;
-                }
-                verticalTiers[tier] = pct;
+                const cardDiv = document.createElement('div');
+                cardDiv.className = `pinned-card bg-white/95 backdrop-blur-md p-2.5 rounded-2xl border border-slate-200 shadow-md hover:shadow-lg transition-all text-xs w-48`;
+                cardDiv.style.left = `${pct}%`;
+                cardDiv.style.top = `${topOffset}px`;
 
-                const topOffset = tier * 54;
+                const borderAccent = isCalcul ? 'border-sky-400' : 'border-amber-400';
 
-                const cardEl = document.createElement('div');
-                cardEl.className = `pinned-card ${selectedCardId === card.id ? 'z-30' : ''}`;
-                cardEl.style.left = `${pct}%`;
-                cardEl.style.top = `${topOffset}px`;
-
-                const typeIcon = isCalcul ? 'fa-calculator' : 'fa-cloud-sun';
-
-                cardEl.innerHTML = `
-                    <div class="relative group">
-                        <div class="absolute left-1/2 top-full w-0.5 bg-purple-400/80 -translate-x-1/2" style="height: ${60 + (verticalTiers.length - tier)*10}px;"></div>
-
-                        <div onclick="openPercentModalForCard('${card.id}', event)" class="bg-white hover:bg-purple-50 border-2 ${isCalcul ? 'border-sky-500' : 'border-amber-500'} rounded-2xl px-3 py-1.5 shadow-md flex items-center gap-2 cursor-pointer transition-transform hover:scale-105">
-                            <span class="${isCalcul ? 'bg-sky-600' : 'bg-amber-600'} text-white font-black text-xs px-2 py-0.5 rounded-full font-display flex items-center gap-1">
-                                <i class="fa-solid ${typeIcon} text-[10px]"></i> ${pct}%
-                            </span>
-                            <span class="text-xs font-bold text-slate-800 max-w-[140px] truncate">${card.icon} ${card.text}</span>
-                            <button onclick="openNoteModal('${card.id}'); event.stopPropagation();" class="text-slate-400 hover:text-purple-600 p-0.5" title="Afegir argumentació o factors">
-                                <i class="fa-solid ${cardNotes[card.id] || (cardFactors[card.id] && cardFactors[card.id].length) ? 'fa-comment text-purple-600' : 'fa-comment-dots'}"></i>
-                            </button>
+                cardDiv.innerHTML = `
+                    <div class="border-l-4 ${borderAccent} pl-2 space-y-1">
+                        <div class="flex justify-between items-start gap-1">
+                            <span class="font-black text-purple-700 text-xs font-display bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100">${pct}%</span>
+                            <div class="flex items-center gap-1">
+                                <button onclick="openNoteModal('${card.id}')" title="Afegir/Editar Argument" class="${hasNote ? 'text-purple-600' : 'text-slate-300'} hover:text-purple-700 p-0.5">
+                                    <i class="fa-solid fa-comment-dots"></i>
+                                </button>
+                                <button onclick="openPercentModalForCard('${card.id}')" title="Reajustar %" class="text-slate-400 hover:text-purple-600 p-0.5">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="unpinCard('${card.id}')" title="Retornar al banc" class="text-slate-400 hover:text-rose-500 p-0.5">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
                         </div>
+                        <p class="font-bold text-slate-800 text-[11px] leading-snug line-clamp-2">${card.icon || ''} ${card.text}</p>
+                        ${hasNote ? `<p class="text-[10px] text-purple-600 italic truncate"><i class="fa-solid fa-quote-left text-[8px]"></i> ${cardNotes[card.id]}</p>` : ''}
                     </div>
                 `;
-
-                pinnedArea.appendChild(cardEl);
+                area.appendChild(cardDiv);
             });
         }
 
         function selectCard(id) {
-            selectedCardId = selectedCardId === id ? null : id;
-            const card = cards.find(c => c.id === id);
-            if (card && selectedCardId) speakText(card.text);
-            renderAll();
+            selectedCardId = id;
+            speakText(cards.find(c => c.id === id)?.text);
+            renderBank();
         }
 
-        function handleTrackClick(event) {
-            const rect = document.getElementById('spectrumTrack').getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            let percent = Math.round((clickX / rect.width) * 100);
-            percent = Math.max(0, Math.min(100, percent));
-
-            if (selectedCardId) {
-                cardPercentages[selectedCardId] = percent;
-                const card = cards.find(c => c.id === selectedCardId);
-                const isCalcul = card.type === 'calcul';
-                showToast(`"${card.text}" situada al ${percent}% (${isCalcul ? 'Càlcul teòric' : 'Estimació variable'})`, 'info');
-                selectedCardId = null;
-                renderAll();
-            } else {
-                showToast(`Fes clic primer sobre una targeta per situar-la al ${percent}%!`, 'warning');
-            }
-        }
-
-        function deselectIfBankClick(event) {
-            if (event.target.id === 'cardBank') {
+        function deselectIfBankClick(e) {
+            if (e.target.id === 'cardBank') {
                 selectedCardId = null;
                 renderBank();
             }
         }
 
-        function openPercentModalForCard(cardId, event) {
-            if (event) event.stopPropagation();
-            modalEditingCardId = cardId;
-            const card = cards.find(c => c.id === cardId);
-            const currentPct = cardPercentages[cardId] !== null ? cardPercentages[cardId] : 50;
+        function handleTrackClick(event) {
+            const track = document.getElementById('spectrumTrack');
+            const rect = track.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            let percentage = Math.round((clickX / rect.width) * 100);
+            percentage = Math.max(0, Math.min(100, percentage));
 
-            document.getElementById('percentCardText').innerText = `${card.icon} ${card.text}`;
-            setSliderValue(currentPct);
-            document.getElementById('percentModal').classList.remove('hidden');
+            if (selectedCardId) {
+                cardPercentages[selectedCardId] = percentage;
+                const activeId = selectedCardId;
+                selectedCardId = null;
+                renderAll();
+                
+                const card = cards.find(c => c.id === activeId);
+                if (card && card.type === 'estimacio') {
+                    openNoteModal(activeId);
+                }
+            } else {
+                showToast("Primer selecciona una targeta del banc de sota!", "info");
+            }
         }
 
-        function closePercentModal() {
-            document.getElementById('percentModal').classList.add('hidden');
-            modalEditingCardId = null;
+        function unpinCard(id) {
+            cardPercentages[id] = null;
+            renderAll();
+        }
+
+        function openPercentModalForCard(id) {
+            modalEditingCardId = id;
+            const card = cards.find(c => c.id === id);
+            const currentPct = cardPercentages[id] !== null ? cardPercentages[id] : 50;
+            
+            document.getElementById('percentCardText').innerText = `${card.icon || ''} ${card.text}`;
+            document.getElementById('percentSlider').value = currentPct;
+            updateSliderDisplay(currentPct);
+            document.getElementById('percentModal').classList.remove('hidden');
         }
 
         function updateSliderDisplay(val) {
@@ -674,116 +700,43 @@
             if (modalEditingCardId) {
                 const val = parseInt(document.getElementById('percentSlider').value, 10);
                 cardPercentages[modalEditingCardId] = val;
-                showToast(`Posició actualitzada a ${val}%`, 'success');
+                closePercentModal();
                 renderAll();
             }
-            closePercentModal();
         }
 
         function returnToBankFromModal() {
             if (modalEditingCardId) {
-                cardPercentages[modalEditingCardId] = null;
-                showToast("Targeta retornada al banc pendents", 'info');
-                renderAll();
-            }
-            closePercentModal();
-        }
-
-        function updateProgress() {
-            const total = cards.length;
-            const placed = cards.filter(c => cardPercentages[c.id] !== null && cardPercentages[c.id] !== undefined).length;
-            document.getElementById('progressText').innerText = `${placed} / ${total}`;
-        }
-
-        function checkAnswers() {
-            const unplaced = cards.filter(c => cardPercentages[c.id] === null || cardPercentages[c.id] === undefined).length;
-            if (unplaced > 0) {
-                showToast(`Encara queden ${unplaced} targetes pendents de situar a la línia.`, 'warning');
-            }
-
-            let correctCount = 0;
-            const total = cards.length;
-
-            cards.forEach(card => {
-                const userPct = cardPercentages[card.id];
-                if (userPct !== null && userPct !== undefined) {
-                    if (card.type === 'estimacio') {
-                        correctCount++;
-                    } else {
-                        const min = card.minValid !== undefined ? card.minValid : (card.targetValue - 10);
-                        const max = card.maxValid !== undefined ? card.maxValid : (card.targetValue + 10);
-                        if (userPct >= min && userPct <= max) {
-                            correctCount++;
-                        }
-                    }
-                }
-            });
-
-            const percent = Math.round((correctCount / total) * 100);
-            document.getElementById('scoreText').innerText = `${percent}% (${correctCount}/${total})`;
-
-            if (correctCount === total) {
-                triggerCelebration();
-                showToast("🎉 Fantàstic! Has situat el càlcul teòric i les estimacions de factors correctament!", "success");
-            } else {
-                showToast(`Has situat ${correctCount} de ${total} targetes. Recorda que les d'Estimació depenen de quins factors consideris!`, "info");
+                unpinCard(modalEditingCardId);
+                closePercentModal();
             }
         }
 
-        function giveHint() {
-            const incorrectCards = cards.filter(c => {
-                const pct = cardPercentages[c.id];
-                if (pct === null || pct === undefined) return true;
-                if (c.type === 'estimacio') return false;
-                const min = c.minValid !== undefined ? c.minValid : (c.targetValue - 10);
-                const max = c.maxValid !== undefined ? c.maxValid : (c.targetValue + 10);
-                return pct < min || pct > max;
-            });
-
-            if (incorrectCards.length === 0) {
-                showToast("Totes les targetes de càlcul estan al lloc correcte i les d'estimació ben posicionades!", "success");
-                return;
-            }
-
-            const randomCard = incorrectCards[Math.floor(Math.random() * incorrectCards.length)];
-            showToast(`💡 Pista per a "${randomCard.text}": ${randomCard.hint || 'Calcula les opcions possibles.'}`, "info");
-            selectedCardId = randomCard.id;
-            renderAll();
+        function closePercentModal() {
+            modalEditingCardId = null;
+            document.getElementById('percentModal').classList.add('hidden');
         }
 
-        function showSolution() {
-            cards.forEach(card => {
-                cardPercentages[card.id] = card.targetValue;
-            });
-            selectedCardId = null;
-            renderAll();
-            checkAnswers();
-            showToast("S'ha desplegat la posicionament de referència.", "info");
-        }
-
-        function openNoteModal(cardId) {
-            activeNoteCardId = cardId;
-            const cardObj = cards.find(c => c.id === cardId);
-            if (!cardObj) return;
-
-            document.getElementById('noteCardText').innerText = `${cardObj.icon} ${cardObj.text} (${cardObj.type === 'calcul' ? '🧮 Càlcul Teòric' : '🌤️ Estimació Variable'})`;
-            document.getElementById('noteInput').value = cardNotes[cardId] || '';
+        function openNoteModal(id) {
+            activeNoteCardId = id;
+            const card = cards.find(c => c.id === id);
+            document.getElementById('noteCardText').innerText = `${card.icon || ''} ${card.text} (${cardPercentages[id]}%)`;
+            document.getElementById('noteInput').value = cardNotes[id] || '';
 
             const suggestionsBox = document.getElementById('factorSuggestionsBox');
             const tagsContainer = document.getElementById('factorTagsContainer');
             tagsContainer.innerHTML = '';
 
-            if (cardObj.suggestedFactors && cardObj.suggestedFactors.length > 0) {
+            if (card.suggestedFactors && card.suggestedFactors.length > 0) {
                 suggestionsBox.classList.remove('hidden');
-                if (!cardFactors[cardId]) cardFactors[cardId] = [];
-
-                cardObj.suggestedFactors.forEach(factor => {
-                    const isSelected = cardFactors[cardId].includes(factor);
-                    const pill = document.createElement('button');
-                    pill.className = `text-xs px-2.5 py-1 rounded-lg font-semibold transition-all border ${isSelected ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-amber-800 border-amber-300 hover:bg-amber-100'}`;
-                    pill.innerText = factor;
-                    pill.onclick = () => toggleFactor(cardId, factor, pill);
-                    tagsContainer.appendChild(pill);
+                card.suggestedFactors.forEach(factor => {
+                    const isSelected = (cardFactors[id] || []).includes(factor);
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all ${isSelected ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-amber-800 border-amber-300 hover:bg-amber-100'}`;
+                    btn.innerText = factor;
+                    btn.onclick = () => toggleFactorTag(id, factor, btn);
+                    tagsContainer.appendChild(btn);
                 });
             } else {
                 suggestionsBox.classList.add('hidden');
@@ -792,118 +745,152 @@
             document.getElementById('noteModal').classList.remove('hidden');
         }
 
-        function toggleFactor(cardId, factor, element) {
+        function toggleFactorTag(cardId, factor, btn) {
             if (!cardFactors[cardId]) cardFactors[cardId] = [];
             const idx = cardFactors[cardId].indexOf(factor);
-            if (idx >= 0) {
+            if (idx > -1) {
                 cardFactors[cardId].splice(idx, 1);
-                element.className = "text-xs px-2.5 py-1 rounded-lg font-semibold transition-all border bg-white text-amber-800 border-amber-300 hover:bg-amber-100";
+                btn.className = "text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all bg-white text-amber-800 border-amber-300 hover:bg-amber-100";
             } else {
                 cardFactors[cardId].push(factor);
-                element.className = "text-xs px-2.5 py-1 rounded-lg font-semibold transition-all border bg-amber-600 text-white border-amber-600";
+                btn.className = "text-[11px] px-2.5 py-1 rounded-lg border font-semibold transition-all bg-amber-600 text-white border-amber-600";
             }
-        }
-
-        function closeNoteModal() {
-            document.getElementById('noteModal').classList.add('hidden');
-            activeNoteCardId = null;
         }
 
         function saveNote() {
             if (activeNoteCardId) {
                 cardNotes[activeNoteCardId] = document.getElementById('noteInput').value;
-                renderAll();
-                showToast("S'han desat els arguments i factors seleccionats.", "success");
+                closeNoteModal();
+                renderSpectrumLine();
+                showToast("Argument guardat correctament", "success");
             }
-            closeNoteModal();
+        }
+
+        function closeNoteModal() {
+            activeNoteCardId = null;
+            document.getElementById('noteModal').classList.add('hidden');
+        }
+
+        function updateProgress() {
+            const placedCount = cards.filter(c => cardPercentages[c.id] !== null && cardPercentages[c.id] !== undefined).length;
+            document.getElementById('progressText').innerText = `${placedCount} / ${cards.length}`;
+        }
+
+        function checkAnswers() {
+            const placedCards = cards.filter(c => cardPercentages[c.id] !== null && cardPercentages[c.id] !== undefined);
+            if (placedCards.length === 0) {
+                showToast("Encara no has situat cap targeta a la línia!", "warning");
+                return;
+            }
+
+            let correctCount = 0;
+            placedCards.forEach(card => {
+                const userVal = cardPercentages[card.id];
+                if (userVal >= card.minValid && userVal <= card.maxValid) {
+                    correctCount++;
+                }
+            });
+
+            const scoreText = `${correctCount} / ${placedCards.length}`;
+            document.getElementById('scoreText').innerText = scoreText;
+
+            if (correctCount === cards.length && cards.length > 0) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                showToast("Molt bé! Totes les opcions estan en rangs correctes!", "success");
+            } else {
+                showToast(`Tens ${correctCount} de ${placedCards.length} targetes en un rang raonable.`, "info");
+            }
+        }
+
+        function giveHint() {
+            const pending = cards.filter(c => cardPercentages[c.id] === null || cardPercentages[c.id] === undefined);
+            if (pending.length > 0) {
+                const card = pending[0];
+                showToast(`Pista per "${card.text}": ${card.hint}`, "info");
+                speakText(card.hint);
+            } else {
+                showToast("Ja has posicionat totes les targetes! Prem 'Comprovar Respostes'.", "info");
+            }
+        }
+
+        function showSolution() {
+            cards.forEach(card => {
+                cardPercentages[card.id] = card.targetValue;
+            });
+            renderAll();
+            checkAnswers();
+            showToast("S'ha mostrat la solució teòrica suggerida.", "info");
         }
 
         function openEditorModal() {
             const list = document.getElementById('editCardsList');
             list.innerHTML = '';
 
-            cards.forEach((c) => {
-                list.appendChild(createCardEditRow(c));
+            cards.forEach((card, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex gap-2 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200";
+                row.innerHTML = `
+                    <input type="text" value="${card.icon || ''}" class="w-10 p-1.5 text-center border rounded-lg text-sm" placeholder="Emoji" id="editIcon_${idx}">
+                    <input type="text" value="${card.text}" class="flex-grow p-1.5 border rounded-lg text-sm font-semibold" placeholder="Text de l'afirmació" id="editText_${idx}">
+                    <select id="editType_${idx}" class="p-1.5 border rounded-lg text-xs font-bold bg-white">
+                        <option value="calcul" ${card.type === 'calcul' ? 'selected' : ''}>Càlcul</option>
+                        <option value="estimacio" ${card.type === 'estimacio' ? 'selected' : ''}>Estimació</option>
+                    </select>
+                    <input type="number" min="0" max="100" value="${card.targetValue}" class="w-14 p-1.5 border rounded-lg text-xs font-bold text-center" title="% Objectiu" id="editTarget_${idx}">
+                    <button onclick="removeCardField(${idx})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash"></i></button>
+                `;
+                list.appendChild(row);
             });
 
             document.getElementById('editorModal').classList.remove('hidden');
         }
 
-        function closeEditorModal() {
-            document.getElementById('editorModal').classList.add('hidden');
-        }
-
-        function createCardEditRow(c = {}) {
-            const div = document.createElement('div');
-            div.className = "edit-card-row bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2";
-            div.dataset.id = c.id || `c_${Date.now()}_${Math.random().toString(36).substr(2,3)}`;
-
-            div.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <input type="text" value="${c.icon || '📄'}" class="edit-icon w-12 text-center border border-slate-300 rounded-xl p-2 outline-none" placeholder="Emoji">
-                    <input type="text" value="${c.text || ''}" class="edit-text flex-grow border border-slate-300 rounded-xl p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Afirmació...">
-                    <select class="edit-type border border-slate-300 rounded-xl p-2 text-xs outline-none">
-                        <option value="calcul" ${c.type === 'calcul' ? 'selected' : ''}>Càlcul Teòric</option>
-                        <option value="estimacio" ${c.type === 'estimacio' ? 'selected' : ''}>Estimació Variable</option>
-                    </select>
-                    <button onclick="this.closest('.edit-card-row').remove()" class="text-slate-400 hover:text-rose-500 p-2"><i class="fa-solid fa-trash"></i></button>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <div class="flex items-center gap-1">
-                        <span class="text-xs font-bold text-slate-500">% Ref:</span>
-                        <input type="number" min="0" max="100" value="${c.targetValue !== undefined ? c.targetValue : 50}" class="edit-target w-20 border border-slate-300 rounded-xl p-2 text-xs outline-none">
-                    </div>
-                    <input type="text" value="${c.hint || ''}" class="edit-hint flex-grow border border-slate-300 rounded-xl p-2 text-xs outline-none" placeholder="Pista opcional...">
-                </div>
-            `;
-            return div;
-        }
-
         function addCardField() {
-            document.getElementById('editCardsList').appendChild(createCardEditRow({ text: 'Nova afirmació per avaluar', icon: '❓', type: 'calcul', targetValue: 50 }));
+            const newCard = {
+                id: "custom_" + Date.now(),
+                type: "calcul",
+                text: "Nova afirmació...",
+                icon: "⚡",
+                targetValue: 50,
+                minValid: 40,
+                maxValid: 60,
+                hint: "Pista personalitzada",
+                explanation: "Explicació personalitzada"
+            };
+            cards.push(newCard);
+            openEditorModal();
+        }
+
+        function removeCardField(idx) {
+            cards.splice(idx, 1);
+            openEditorModal();
         }
 
         function saveCustomStatements() {
-            const rows = document.querySelectorAll('.edit-card-row');
-            const newCards = [];
+            cards.forEach((card, idx) => {
+                const iconInput = document.getElementById(`editIcon_${idx}`);
+                const textInput = document.getElementById(`editText_${idx}`);
+                const typeInput = document.getElementById(`editType_${idx}`);
+                const targetInput = document.getElementById(`editTarget_${idx}`);
 
-            rows.forEach(r => {
-                const text = r.querySelector('.edit-text').value.trim();
-                if (text) {
-                    const targetVal = parseInt(r.querySelector('.edit-target').value, 10) || 50;
-                    const cardType = r.querySelector('.edit-type').value;
-                    newCards.push({
-                        id: r.dataset.id,
-                        text: text,
-                        icon: r.querySelector('.edit-icon').value.trim() || '📄',
-                        type: cardType,
-                        targetValue: targetVal,
-                        minValid: Math.max(0, targetVal - 10),
-                        maxValid: Math.min(100, targetVal + 10),
-                        hint: r.querySelector('.edit-hint').value.trim()
-                    });
+                if (textInput) {
+                    card.icon = iconInput.value;
+                    card.text = textInput.value;
+                    card.type = typeInput.value;
+                    const val = parseInt(targetInput.value, 10) || 50;
+                    card.targetValue = val;
+                    card.minValid = Math.max(0, val - 10);
+                    card.maxValid = Math.min(100, val + 10);
                 }
             });
 
-            if (newCards.length === 0) {
-                alert("Heu d'afegir com a mínim una afirmació.");
-                return;
-            }
-
-            cards = newCards;
             closeEditorModal();
             resetCards();
-            showToast("Les afirmacions s'han actualitzat correctament!", "success");
+            showToast("Afirmacions actualitzades!", "success");
         }
 
-        function speakText(text) {
-            if (!ttsEnabled || !('speechSynthesis' in window)) return;
-
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ca-ES';
-            utterance.rate = 0.95;
-            window.speechSynthesis.speak(utterance);
+        function closeEditorModal() {
+            document.getElementById('editorModal').classList.add('hidden');
         }
 
         function toggleAudio() {
@@ -911,39 +898,39 @@
             const btn = document.getElementById('ttsToggleBtn');
             if (ttsEnabled) {
                 btn.className = "bg-purple-100 text-purple-700 p-2 rounded-xl transition-colors";
-                showToast("Veu en català activada", "info");
+                showToast("Veu activada", "info");
             } else {
                 btn.className = "bg-slate-100 text-slate-400 p-2 rounded-xl transition-colors";
+                window.speechSynthesis.cancel();
                 showToast("Veu desactivada", "info");
             }
         }
 
-        function triggerCelebration() {
-            if (typeof confetti === 'function') {
-                confetti({
-                    particleCount: 120,
-                    spread: 80,
-                    origin: { y: 0.6 }
-                });
-            }
+        function speakText(text) {
+            if (!ttsEnabled || !('speechSynthesis' in window) || !text) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ca-ES';
+            window.speechSynthesis.speak(utterance);
         }
 
-        function showToast(msg, type = 'info') {
+        function showToast(msg, type = "info") {
             const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
+            const msgEl = document.getElementById('toastMessage');
+            const iconEl = document.getElementById('toastIcon');
 
-            toastMsg.innerText = msg;
-
+            msgEl.innerText = msg;
+            
             if (type === 'success') {
-                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+                iconEl.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
             } else if (type === 'warning') {
-                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-lg";
+                iconEl.className = "fa-solid fa-triangle-exclamation text-amber-400 text-lg";
             } else {
-                toastIcon.className = "fa-solid fa-circle-info text-purple-400 text-lg";
+                iconEl.className = "fa-solid fa-circle-info text-purple-400 text-lg";
             }
 
             toast.classList.remove('translate-y-20', 'opacity-0');
+            
             setTimeout(() => {
                 toast.classList.add('translate-y-20', 'opacity-0');
             }, 3500);
