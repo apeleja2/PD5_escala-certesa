@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Google Fonts Inter & Outfit (Canva style feel) -->
+    <!-- Google Fonts Inter & Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -120,6 +120,13 @@
 </head>
 <body class="flex flex-col justify-between min-h-screen text-slate-800">
 
+    <!-- Banner si es carrega un treball compartit -->
+    <div id="sharedNotice" class="hidden bg-emerald-600 text-white text-xs sm:text-sm font-semibold py-2 px-4 text-center flex items-center justify-center gap-2 shadow-inner">
+        <i class="fa-solid fa-graduation-cap text-base"></i>
+        <span>Estàs veient el treball compartit d'un alumne!</span>
+        <button onclick="clearSharedData()" class="ml-3 underline bg-emerald-700 hover:bg-emerald-800 px-2.5 py-0.5 rounded-lg text-xs">Carregar versió inicial</button>
+    </div>
+
     <!-- Canva App Header -->
     <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -135,6 +142,11 @@
 
             <!-- Canva Toolbar Controls -->
             <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="generateShareableLink()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold px-3 py-2 rounded-xl transition-all shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span>Compartir Enllaç</span>
+                </button>
+
                 <button onclick="openEditorModal()" class="bg-slate-100 hover:bg-purple-50 hover:text-purple-700 text-slate-700 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition-all border border-slate-200 flex items-center gap-2">
                     <i class="fa-solid fa-pen-ruler text-purple-600"></i>
                     <span>Editar Afirmacions</span>
@@ -166,7 +178,6 @@
                     Tria una targeta i situa-la en la línia. Distingeix entre esdeveniments de <strong class="text-sky-700 font-bold">🧮 Càlcul teòric</strong> (probabilitat matemàtica exacta) i de <strong class="text-amber-700 font-bold">🌤️ Estimació variable</strong> (depenen de factors contextuals com el temps o l'esforç).
                 </p>
                 
-                <!-- Concept Legend -->
                 <div class="flex flex-wrap gap-2 pt-2">
                     <div class="badge-calcul text-xs px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1.5">
                         <i class="fa-solid fa-calculator"></i>
@@ -205,65 +216,41 @@
                 </span>
             </div>
 
-            <!-- Interactive Line Canvas Track -->
             <div class="spectrum-line-container py-4 px-2">
-                
-                <!-- Main Spectrum Gradient Line -->
                 <div id="spectrumTrack" onclick="handleTrackClick(event)" class="spectrum-bar w-full relative cursor-pointer group">
                     <div class="absolute inset-0 rounded-full group-hover:ring-4 group-hover:ring-purple-300/50 transition-all"></div>
                 </div>
 
-                <!-- Tick Marks and Main References -->
                 <div class="relative w-full h-8 mt-2 text-xs font-bold text-slate-600">
                     <div class="absolute left-0 -translate-x-0 flex flex-col items-center">
                         <div class="h-2 w-0.5 bg-rose-500 mb-1"></div>
                         <span class="text-rose-600 font-black">0% Impossible</span>
-                        <span class="text-[10px] text-slate-400 font-normal">Nivell 1</span>
                     </div>
-
                     <div class="absolute left-[25%] -translate-x-1/2 flex flex-col items-center">
                         <div class="h-2 w-0.5 bg-orange-400 mb-1"></div>
                         <span class="text-slate-700">25%</span>
-                        <span class="text-[10px] text-slate-400 font-normal">Nivell 2</span>
                     </div>
-
                     <div class="absolute left-[50%] -translate-x-1/2 flex flex-col items-center">
                         <div class="h-2 w-0.5 bg-amber-500 mb-1"></div>
                         <span class="text-slate-800 font-extrabold">50%</span>
-                        <span class="text-[10px] text-slate-400 font-normal">Nivell 3</span>
                     </div>
-
                     <div class="absolute left-[75%] -translate-x-1/2 flex flex-col items-center">
                         <div class="h-2 w-0.5 bg-sky-500 mb-1"></div>
                         <span class="text-slate-700">75%</span>
-                        <span class="text-[10px] text-slate-400 font-normal">Nivell 4</span>
                     </div>
-
                     <div class="absolute right-0 translate-x-0 flex flex-col items-center">
                         <div class="h-2 w-0.5 bg-emerald-500 mb-1"></div>
                         <span class="text-emerald-600 font-black">100% Segur</span>
-                        <span class="text-[10px] text-slate-400 font-normal">Nivell 5</span>
                     </div>
-
-                    <!-- Faint intermediate ticks (10%, 20%, 30%, 40%, 60%, 70%, 80%, 90%) -->
-                    <div class="absolute left-[10%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="10%"></div>
-                    <div class="absolute left-[20%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="20%"></div>
-                    <div class="absolute left-[30%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="30%"></div>
-                    <div class="absolute left-[40%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="40%"></div>
-                    <div class="absolute left-[60%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="60%"></div>
-                    <div class="absolute left-[70%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="70%"></div>
-                    <div class="absolute left-[80%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="80%"></div>
-                    <div class="absolute left-[90%] -translate-x-1/2 h-1.5 w-0.5 bg-slate-300 top-0" title="90%"></div>
                 </div>
 
-                <!-- Pinned Cards Container (Vertical stacking zone above line) -->
                 <div id="pinnedCardsArea" class="relative w-full min-h-[220px] mt-6 border-b border-dashed border-slate-200">
-                    <!-- Cards positioned dynamically along 0%-100% width render here -->
+                    <!-- Cards render here -->
                 </div>
             </div>
         </div>
 
-        <!-- Card Bank (Pending Deck) -->
+        <!-- Card Bank -->
         <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <h3 class="font-display font-extrabold text-sm text-slate-600 uppercase tracking-wider flex items-center gap-2">
@@ -293,6 +280,10 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <button onclick="generateShareableLink()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Enviar al Professor (Copiar Enllaç)</span>
+                </button>
                 <button onclick="showSolution()" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold px-4 py-2.5 rounded-xl border border-purple-200 transition-all flex items-center gap-2 text-sm">
                     <i class="fa-solid fa-eye"></i>
                     <span>Veure Solució</span>
@@ -319,7 +310,6 @@
                 <div id="sliderValueDisplay" class="text-3xl font-black text-purple-600 font-display">50%</div>
                 <input type="range" id="percentSlider" min="0" max="100" value="50" oninput="updateSliderDisplay(this.value)" class="w-full accent-purple-600 h-2 bg-slate-200 rounded-lg cursor-pointer">
                 
-                <!-- Quick Preset Percentages -->
                 <div class="flex justify-center gap-1.5 flex-wrap text-xs">
                     <button onclick="setSliderValue(0)" class="px-2.5 py-1 bg-slate-100 hover:bg-purple-100 rounded-lg font-bold">0%</button>
                     <button onclick="setSliderValue(17)" class="px-2.5 py-1 bg-slate-100 hover:bg-purple-100 rounded-lg font-bold">17% (1/6)</button>
@@ -361,7 +351,7 @@
                 </p>
 
                 <div id="editCardsList" class="space-y-3">
-                    <!-- Dynamic statement inputs generated here -->
+                    <!-- Dynamic statement inputs -->
                 </div>
 
                 <button onclick="addCardField()" class="w-full py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-xl border border-purple-200 transition-colors flex items-center justify-center gap-2 text-xs">
@@ -389,7 +379,6 @@
             </div>
             <p id="noteCardText" class="text-sm font-semibold text-slate-700 bg-purple-50/70 p-3 rounded-xl border border-purple-100">---</p>
             
-            <!-- Dynamic Factor Selector for Estimacio cards -->
             <div id="factorSuggestionsBox" class="hidden space-y-1.5 bg-amber-50 p-3 rounded-2xl border border-amber-200">
                 <span class="text-xs font-bold text-amber-800 flex items-center gap-1">
                     <i class="fa-solid fa-sliders"></i> Quins factors influeixen en aquesta estimació?
@@ -410,6 +399,23 @@
         </div>
     </div>
 
+    <!-- Share Link Success Modal -->
+    <div id="shareModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 text-center">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="font-display font-extrabold text-lg text-slate-800">Enllaç Copiat al Portapapers!</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                El teu treball (les teves afirmacions i on les has posicionat) s'ha convertit en un enllaç. Ara només l'has d'**enganxar (Ctrl+V)** a la teva tasca de Classroom, Moodle o correu per enviar-ho al professor.
+            </p>
+            <input type="text" id="shareUrlInput" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-600 outline-none select-all text-center font-mono">
+            <button onclick="closeShareModal()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md">
+                D'acord
+            </button>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-20 opacity-0 flex items-center gap-3 z-50">
         <i id="toastIcon" class="fa-solid fa-circle-info text-purple-400 text-lg"></i>
@@ -417,132 +423,96 @@
     </div>
 
     <script>
-        // Updated Dataset with classification (calcul vs estimacio) and suggested factors
         let initialCards = [
-            {
-                id: "c1",
-                type: "calcul", // Càlcul matemàtic
-                text: "Treure un 6 amb un dau normal",
-                icon: "🎲",
-                targetValue: 17, // ~16.7% (1/6)
-                minValid: 10,
-                maxValid: 25,
-                hint: "CÀLCUL: Hi ha 1 cara favorable de 6 totals (1/6 ≈ 16.7%).",
-                explanation: "1/6 = 16.7% (Càlcul matemàtic teòric)."
-            },
-            {
-                id: "c2",
-                type: "calcul",
-                text: "Treure vermell de la bossa de l’act.1",
-                icon: "🛍️",
-                targetValue: 75,
-                minValid: 65,
-                maxValid: 85,
-                hint: "CÀLCUL: A la bossa de l'activitat 1 hi ha majoria de boles vermelles (75%).",
-                explanation: "75% segons la composició de la bossa."
-            },
-            {
-                id: "c3",
-                type: "calcul",
-                text: "Treure cara en llançar una moneda",
-                icon: "🪙",
-                targetValue: 50,
-                minValid: 40,
-                maxValid: 60,
-                hint: "CÀLCUL: Hi ha 2 opcions equiprobables (cara o creu), 50%.",
-                explanation: "Exactament 50% (Càlcul matemàtic)."
-            },
-            {
-                id: "c4",
-                type: "calcul",
-                text: "El sol sortirà demà",
-                icon: "☀️",
-                targetValue: 100,
-                minValid: 95,
-                maxValid: 100,
-                hint: "CÀLCUL / FET DETERMINISTA: És un fet segur per la rotació de la Terra (100%).",
-                explanation: "100% Segur."
-            },
-            {
-                id: "c5",
-                type: "estimacio", // Estimació variable segons factors
-                text: "Demà plourà",
-                icon: "🌧️",
-                targetValue: 25,
-                minValid: 5,
-                maxValid: 75, // Wide range valid if factors indicated
-                suggestedFactors: ["Previsió del temps", "Època de l'any (estació)", "Zona / Clima local", "Presència de núvols"],
-                hint: "ESTIMACIÓ: Depèn del mapa del temps, l'estació de l'any i la zona geogràfica.",
-                explanation: "Estimació variable segons els factors meteorològics del dia."
-            },
-            {
-                id: "c6",
-                type: "calcul",
-                text: "Treure un número parell amb un dau",
-                icon: "🎲",
-                targetValue: 50,
-                minValid: 40,
-                maxValid: 60,
-                hint: "CÀLCUL: Hi ha 3 números parells (2, 4, 6) de 6 possibles (50%).",
-                explanation: "3 de 6 = 50% (Càlcul matemàtic)."
-            },
-            {
-                id: "c7",
-                type: "calcul",
-                text: "Treure un 7 amb un dau de l’1 al 6",
-                icon: "🚫",
-                targetValue: 0,
-                minValid: 0,
-                maxValid: 5,
-                hint: "CÀLCUL: En un dau d'1 a 6 no existeix el número 7 (0%).",
-                explanation: "0% Impossible."
-            },
-            {
-                id: "c8",
-                type: "estimacio",
-                text: "Veuré avui un arc de Sant Martí",
-                icon: "🌈",
-                targetValue: 15,
-                minValid: 0,
-                maxValid: 50,
-                suggestedFactors: ["Pluja i sol simultanis", "Si estaré a l'exterior", "Hora del dia / Posició del sol"],
-                hint: "ESTIMACIÓ: Cal que plogui i faci sol alhora i que estiguis a l'exterior mirant en la direcció adequada.",
-                explanation: "Estimació variable segons la coincidència de factors atmosfèrics i d'observació."
-            },
-            {
-                id: "c9",
-                type: "estimacio",
-                text: "El trimestre vinent tothom aprovarà les matemàtiques",
-                icon: "📐",
-                targetValue: 30,
-                minValid: 5,
-                maxValid: 80,
-                suggestedFactors: ["Esforç i estudi de la classe", "Dificultat dels temes", "Assistència a classe", "Ajuda / Atenció a la diversitat"],
-                hint: "ESTIMACIÓ: Depèn de l'esforç individual, el treball en equip, la dificultat del tema...",
-                explanation: "Estimació contingents a factors humans (esforç, estudi, dificultat)."
-            }
+            { id: "c1", type: "calcul", text: "Treure un 6 amb un dau normal", icon: "🎲", targetValue: 17, minValid: 10, maxValid: 25, hint: "CÀLCUL: Hi ha 1 cara favorable de 6 totals (1/6 ≈ 16.7%).", explanation: "1/6 = 16.7% (Càlcul matemàtic teòric)." },
+            { id: "c2", type: "calcul", text: "Treure vermell de la bossa de l’act.1", icon: "🛍️", targetValue: 75, minValid: 65, maxValid: 85, hint: "CÀLCUL: A la bossa de l'activitat 1 hi ha majoria de boles vermelles (75%).", explanation: "75% segons la composició de la bossa." },
+            { id: "c3", type: "calcul", text: "Treure cara en llançar una moneda", icon: "🪙", targetValue: 50, minValid: 40, maxValid: 60, hint: "CÀLCUL: Hi ha 2 opcions equiprobables (cara o creu), 50%.", explanation: "Exactament 50% (Càlcul matemàtic)." },
+            { id: "c4", type: "calcul", text: "El sol sortirà demà", icon: "☀️", targetValue: 100, minValid: 95, maxValid: 100, hint: "CÀLCUL / FET DETERMINISTA: És un fet segur per la rotació de la Terra (100%).", explanation: "100% Segur." },
+            { id: "c5", type: "estimacio", text: "Demà plourà", icon: "🌧️", targetValue: 25, minValid: 5, maxValid: 75, suggestedFactors: ["Previsió del temps", "Època de l'any (estació)", "Zona / Clima local", "Presència de núvols"], hint: "ESTIMACIÓ: Depèn del mapa del temps, l'estació de l'any i la zona geogràfica.", explanation: "Estimació variable segons els factors meteorològics del dia." },
+            { id: "c6", type: "calcul", text: "Treure un número parell amb un dau", icon: "🎲", targetValue: 50, minValid: 40, maxValid: 60, hint: "CÀLCUL: Hi ha 3 números parells (2, 4, 6) de 6 possibles (50%).", explanation: "3 de 6 = 50% (Càlcul matemàtic)." },
+            { id: "c7", type: "calcul", text: "Treure un 7 amb un dau de l’1 al 6", icon: "🚫", targetValue: 0, minValid: 0, maxValid: 5, hint: "CÀLCUL: En un dau d'1 a 6 no existeix el número 7 (0%).", explanation: "0% Impossible." },
+            { id: "c8", type: "estimacio", text: "Veuré avui un arc de Sant Martí", icon: "🌈", targetValue: 15, minValid: 0, maxValid: 50, suggestedFactors: ["Pluja i sol simultanis", "Si estaré a l'exterior", "Hora del dia / Posició del sol"], hint: "ESTIMACIÓ: Cal que plogui i faci sol alhora i que estiguis a l'exterior mirant en la direcció adequada.", explanation: "Estimació variable segons la coincidència de factors atmosfèrics i d'observació." },
+            { id: "c9", type: "estimacio", text: "El trimestre vinent tothom aprovarà les matemàtiques", icon: "📐", targetValue: 30, minValid: 5, maxValid: 80, suggestedFactors: ["Esforç i estudi de la classe", "Dificultat dels temes", "Assistència a classe", "Ajuda / Atenció a la diversitat"], hint: "ESTIMACIÓ: Depèn de l'esforç individual, el treball en equip, la dificultat del tema...", explanation: "Estimació contingents a factors humans (esforç, estudi, dificultat)." }
         ];
 
-        // State variables
         let cards = [...initialCards];
-        let cardPercentages = {}; // cardId -> percentage (0 to 100) or null (if in bank)
-        let cardNotes = {}; // cardId -> text argument
-        let cardFactors = {}; // cardId -> array of selected factor strings
+        let cardPercentages = {};
+        let cardNotes = {};
+        let cardFactors = {};
         let selectedCardId = null;
         let activeNoteCardId = null;
         let modalEditingCardId = null;
         let ttsEnabled = true;
 
         window.onload = function() {
-            resetCards();
+            checkUrlParameters();
         };
+
+        function checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('work');
+
+            if (dataParam) {
+                try {
+                    const decoded = JSON.parse(decodeURIComponent(escape(atob(dataParam))));
+                    if (decoded && decoded.cards) {
+                        cards = decoded.cards;
+                        cardPercentages = decoded.percentages || {};
+                        cardNotes = decoded.notes || {};
+                        cardFactors = decoded.factors || {};
+                        document.getElementById('sharedNotice').classList.remove('hidden');
+                        renderAll();
+                        showToast("Treball d'alumne carregat correctament", "success");
+                        return;
+                    }
+                } catch(e) {
+                    console.error("Error en carregar les dades de l'URL", e);
+                }
+            }
+            resetCards();
+        }
+
+        function clearSharedData() {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            document.getElementById('sharedNotice').classList.add('hidden');
+            cards = [...initialCards];
+            resetCards();
+        }
+
+        function generateShareableLink() {
+            const payload = {
+                cards: cards,
+                percentages: cardPercentages,
+                notes: cardNotes,
+                factors: cardFactors
+            };
+
+            try {
+                const jsonString = JSON.stringify(payload);
+                const encoded = btoa(unescape(encodeURIComponent(jsonString)));
+                const shareUrl = `${window.location.origin}${window.location.pathname}?work=${encoded}`;
+
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    document.getElementById('shareUrlInput').value = shareUrl;
+                    document.getElementById('shareModal').classList.remove('hidden');
+                }).catch(() => {
+                    prompt("Copia aquest enllaç per enviar-lo al professor:", shareUrl);
+                });
+            } catch (e) {
+                showToast("Hi ha hagut un error en generar l'enllaç.", "warning");
+            }
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.add('hidden');
+        }
 
         function resetCards() {
             cardPercentages = {};
             cardFactors = {};
             cards.forEach(c => {
-                cardPercentages[c.id] = null; // null means in bank
-                cardFactors[c.id] = [];
+                if (cardPercentages[c.id] === undefined) cardPercentages[c.id] = null;
+                if (!cardFactors[c.id]) cardFactors[c.id] = [];
             });
             selectedCardId = null;
             document.getElementById('scoreText').innerText = '--';
@@ -555,12 +525,11 @@
             updateProgress();
         }
 
-        // Render card deck bank
         function renderBank() {
             const bankEl = document.getElementById('cardBank');
             bankEl.innerHTML = '';
 
-            const pendingCards = cards.filter(c => cardPercentages[c.id] === null);
+            const pendingCards = cards.filter(c => cardPercentages[c.id] === null || cardPercentages[c.id] === undefined);
             document.getElementById('remainingBadge').innerText = pendingCards.length;
 
             if (pendingCards.length === 0) {
@@ -600,7 +569,7 @@
             const pinnedArea = document.getElementById('pinnedCardsArea');
             pinnedArea.innerHTML = '';
 
-            const placedCards = cards.filter(c => cardPercentages[c.id] !== null);
+            const placedCards = cards.filter(c => cardPercentages[c.id] !== null && cardPercentages[c.id] !== undefined);
             placedCards.sort((a, b) => cardPercentages[a.id] - cardPercentages[b.id]);
 
             const verticalTiers = [];
@@ -676,7 +645,6 @@
             }
         }
 
-        // Percentage Adjuster Modal Logic
         function openPercentModalForCard(cardId, event) {
             if (event) event.stopPropagation();
             modalEditingCardId = cardId;
@@ -723,12 +691,12 @@
 
         function updateProgress() {
             const total = cards.length;
-            const placed = cards.filter(c => cardPercentages[c.id] !== null).length;
+            const placed = cards.filter(c => cardPercentages[c.id] !== null && cardPercentages[c.id] !== undefined).length;
             document.getElementById('progressText').innerText = `${placed} / ${total}`;
         }
 
         function checkAnswers() {
-            const unplaced = cards.filter(c => cardPercentages[c.id] === null).length;
+            const unplaced = cards.filter(c => cardPercentages[c.id] === null || cardPercentages[c.id] === undefined).length;
             if (unplaced > 0) {
                 showToast(`Encara queden ${unplaced} targetes pendents de situar a la línia.`, 'warning');
             }
@@ -738,12 +706,10 @@
 
             cards.forEach(card => {
                 const userPct = cardPercentages[card.id];
-                if (userPct !== null) {
+                if (userPct !== null && userPct !== undefined) {
                     if (card.type === 'estimacio') {
-                        // For variable estimations, any placement is valid as long as placed
                         correctCount++;
                     } else {
-                        // Precise calculation validation
                         const min = card.minValid !== undefined ? card.minValid : (card.targetValue - 10);
                         const max = card.maxValid !== undefined ? card.maxValid : (card.targetValue + 10);
                         if (userPct >= min && userPct <= max) {
@@ -767,8 +733,8 @@
         function giveHint() {
             const incorrectCards = cards.filter(c => {
                 const pct = cardPercentages[c.id];
-                if (pct === null) return true;
-                if (c.type === 'estimacio') return false; // Estimations are flexible
+                if (pct === null || pct === undefined) return true;
+                if (c.type === 'estimacio') return false;
                 const min = c.minValid !== undefined ? c.minValid : (c.targetValue - 10);
                 const max = c.maxValid !== undefined ? c.maxValid : (c.targetValue + 10);
                 return pct < min || pct > max;
@@ -780,7 +746,7 @@
             }
 
             const randomCard = incorrectCards[Math.floor(Math.random() * incorrectCards.length)];
-            showToast(`💡 Pista per a "${randomCard.text}": ${randomCard.hint}`, "info");
+            showToast(`💡 Pista per a "${randomCard.text}": ${randomCard.hint || 'Calcula les opcions possibles.'}`, "info");
             selectedCardId = randomCard.id;
             renderAll();
         }
@@ -792,10 +758,9 @@
             selectedCardId = null;
             renderAll();
             checkAnswers();
-            showToast("S'ha desplegat la posicionament de referència (vegeu factors en les estimacions).", "info");
+            showToast("S'ha desplegat la posicionament de referència.", "info");
         }
 
-        // Justification Note & Factors Modal logic
         function openNoteModal(cardId) {
             activeNoteCardId = cardId;
             const cardObj = cards.find(c => c.id === cardId);
@@ -804,7 +769,6 @@
             document.getElementById('noteCardText').innerText = `${cardObj.icon} ${cardObj.text} (${cardObj.type === 'calcul' ? '🧮 Càlcul Teòric' : '🌤️ Estimació Variable'})`;
             document.getElementById('noteInput').value = cardNotes[cardId] || '';
 
-            // Handle factor suggestions box
             const suggestionsBox = document.getElementById('factorSuggestionsBox');
             const tagsContainer = document.getElementById('factorTagsContainer');
             tagsContainer.innerHTML = '';
@@ -932,7 +896,6 @@
             showToast("Les afirmacions s'han actualitzat correctament!", "success");
         }
 
-        // Text-To-Speech (Catalan)
         function speakText(text) {
             if (!ttsEnabled || !('speechSynthesis' in window)) return;
 
@@ -955,7 +918,6 @@
             }
         }
 
-        // Celebration Confetti
         function triggerCelebration() {
             if (typeof confetti === 'function') {
                 confetti({
@@ -966,7 +928,6 @@
             }
         }
 
-        // Toast Messages
         function showToast(msg, type = 'info') {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toastMessage');
