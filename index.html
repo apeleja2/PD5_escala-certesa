@@ -27,4 +27,801 @@
 <body class="text-slate-800 min-h-screen flex flex-col antialiased">
 
   <!-- BANNER DE REVISIÓ PER AL PROFESSOR/A -->
-  <div id="teacherBanner" class="
+  <div id="teacherBanner" class="hidden bg-slate-900 border-b-4 border-emerald-500 text-white px-4 py-3 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
+          <i data-lucide="user-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500 text-slate-900 uppercase tracking-wider">Treball de l'Alumne/a</span>
+          <h2 class="text-base md:text-lg font-black text-white mt-0.5">
+            Nom de l'alumne/a: <span id="teacherStudentName" class="text-emerald-400 underline underline-offset-4">--</span>
+          </h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="teacherStatsText" class="text-xs font-semibold bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300">0 Col·locades</span>
+        <button onclick="exitTeacherMode()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg border border-slate-700 transition">
+          Mode Alumne
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPÇALERA SUPERIOR -->
+  <header class="bg-white/80 backdrop-blur border-b border-slate-200/80 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      
+      <!-- LOGO I TÍTOL ORIGINAL -->
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-200">
+          <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <div class="text-[11px] font-extrabold tracking-wider text-indigo-600 uppercase">TASCA 1 - ACTIVITAT 3 (PÀG. 10)</div>
+          <h1 class="text-xl font-black text-slate-900 tracking-tight">Escala de Certesa Contínua</h1>
+        </div>
+      </div>
+
+      <!-- BOTONS ACCIÓ SUPERIORS -->
+      <div class="flex items-center gap-2 flex-wrap justify-end w-full sm:w-auto">
+        <button onclick="openSendToTeacherModal()" class="px-3.5 py-2 btn-gradient-purple text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-100 hover:opacity-95 transition flex items-center gap-1.5">
+          <i data-lucide="share-2" class="w-4 h-4"></i>
+          <span>Enllaç per al teu mestre/a</span>
+        </button>
+
+        <button onclick="openEditCardsModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200/80 transition flex items-center gap-1.5">
+          <i data-lucide="scissors" class="w-4 h-4"></i>
+          <span>Editar Afirmacions</span>
+        </button>
+
+        <button onclick="resetActivity()" class="px-3 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-xs font-bold rounded-xl border border-slate-200/80 transition flex items-center gap-1" title="Reiniciar">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Reiniciar</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTINGUT PRINCIPAL -->
+  <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex-1 flex flex-col gap-5 w-full">
+
+    <!-- CAIXA D'INFORMACIÓ -->
+    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+      <div class="space-y-2 max-w-3xl">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="px-2.5 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[11px] font-extrabold uppercase tracking-wide">RUTINA DE PENSAMENT</span>
+          <span class="px-2.5 py-0.5 rounded-md bg-cyan-100 text-cyan-800 text-[11px] font-extrabold uppercase tracking-wide">Línia de Certesa Contínua (0% - 100%)</span>
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-900">Situar les afirmacions: Càlcul vs Estimació</h2>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Arrossega o fes clic a una targeta i situa-la en la línia de certesa. Distingeix entre esdeveniments de <strong class="text-slate-800">🧮 Càlcul teòric</strong> i de <strong class="text-slate-800">🌤️ Estimació variable</strong> (que requereixen justificar els factors).
+        </p>
+        <div class="flex items-center gap-2 flex-wrap pt-1">
+          <span class="px-3 py-1 bg-sky-50 text-sky-700 text-[11px] font-semibold rounded-lg border border-sky-100">🧮 Càlcul: Probabilitat matemàtica computable</span>
+          <span class="px-3 py-1 bg-amber-50 text-amber-700 text-[11px] font-semibold rounded-lg border border-amber-100">🌤️ Estimació: Posició variable segons factors (Justificació obligatòria)</span>
+        </div>
+      </div>
+
+      <!-- COMPTADORS SUPERIORS -->
+      <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 min-w-[220px] flex items-center justify-around divide-x divide-slate-200 self-stretch md:self-auto shadow-inner">
+        <div class="text-center px-2">
+          <div class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">TARGETES SITUADES</div>
+          <div id="placedCounter" class="text-xl font-black text-indigo-600 mt-1">0/9</div>
+        </div>
+        <div class="text-center px-2">
+          <div class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">PUNTUACIÓ / ENCERTS</div>
+          <div id="scoreCounter" class="text-xl font-black text-slate-400 mt-1">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EIX DE CERTESA CONTINU -->
+    <section class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col gap-4 relative">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <h3 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+          <span>EIX DE CERTESA CONTINU (0% - 100%)</span>
+        </h3>
+        <span class="text-[11px] font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
+          Fes clic directament a la línia o arrossega la targeta per posicionar-la
+        </span>
+      </div>
+
+      <!-- Barra de Gradient amb Drop Zone -->
+      <div class="relative pt-6 pb-2 cursor-pointer" onclick="handleAxisClick(event)" ondragover="allowDrop(event)" ondrop="handleDrop(event)" id="axisBarContainer">
+        <div class="h-4 w-full rounded-full certesa-bar-gradient shadow-inner relative"></div>
+
+        <!-- Marcadors Visuals de Percentatge -->
+        <div class="relative w-full flex justify-between text-xs font-extrabold text-slate-700 mt-2 select-none pointer-events-none">
+          <div class="flex flex-col items-center">
+            <span class="w-0.5 h-2 bg-rose-500 mb-1"></span>
+            <span class="text-rose-600">0% Impossible</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="w-0.5 h-2 bg-amber-500 mb-1"></span>
+            <span class="text-amber-600">25%</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="w-0.5 h-2 bg-yellow-500 mb-1"></span>
+            <span class="text-yellow-600">50%</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="w-0.5 h-2 bg-blue-500 mb-1"></span>
+            <span class="text-blue-600">75%</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="w-0.5 h-2 bg-emerald-500 mb-1"></span>
+            <span class="text-emerald-600">100% Segur</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÀREA DE TARGETES COL·LOCADES -->
+      <div id="placedArea" ondragover="allowDrop(event)" ondrop="handleDrop(event)" class="min-h-[140px] bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-4 relative flex items-center justify-center transition">
+        <div id="placedCardsContainer" class="w-full relative min-h-[100px] flex flex-wrap gap-2.5 items-center justify-start">
+          <p id="emptyLineNotice" class="text-xs text-slate-400 italic text-center w-full my-auto">
+            Cap targeta situada encara. Fes clic a la línia o arrossega una targeta per situar-la.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BANC DE TARGETES PENDENTS -->
+    <section class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col gap-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-purple-600"><i data-lucide="pin" class="w-4 h-4"></i></span>
+          <h3 class="text-xs font-black uppercase tracking-wider text-slate-800">
+            BANC DE TARGETES PENDENTS <span id="pendingBadge" class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px]">9</span>
+          </h3>
+        </div>
+        <span id="activeSelectionHint" class="text-[11px] text-slate-400">Selecciona o arrossega una targeta.</span>
+      </div>
+
+      <div id="unplacedCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        <!-- Renderitzades dinàmicament -->
+      </div>
+    </section>
+
+    <!-- BARRA INFERIOR DE BOTONS -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 pb-6">
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="checkAnswers()" class="px-5 py-2.5 btn-gradient-check text-white font-extrabold text-xs rounded-2xl shadow-md hover:opacity-95 transition flex items-center gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+          <span>Comprovar Respostes</span>
+        </button>
+
+        <button onclick="openHintModal()" class="px-4 py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-800 font-extrabold text-xs rounded-2xl border border-amber-200 transition flex items-center gap-2">
+          <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600"></i>
+          <span>Demanar Pista</span>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="openSendToTeacherModal()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-md transition flex items-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Enllaç per al teu mestre/a</span>
+        </button>
+
+        <button onclick="showSolution()" class="px-4 py-2.5 bg-white hover:bg-purple-50 text-purple-700 border-2 border-purple-200 font-extrabold text-xs rounded-2xl transition flex items-center gap-2">
+          <i data-lucide="eye" class="w-4 h-4"></i>
+          <span>Veure Solució</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: POSICIONAR / EDITAR TARGETA -->
+  <div id="placeCardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <span id="cardModalBadge" class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-sky-100 text-sky-800">Càlcul</span>
+          <h3 id="cardModalTitle" class="text-base font-bold text-slate-900 mt-1">Títol targeta</h3>
+        </div>
+        <button onclick="closePlaceModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 my-5">
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Percentatge de Certesa:</label>
+            <div class="flex items-center gap-1">
+              <input type="number" id="cardPctInput" min="0" max="100" value="50" 
+                class="w-16 p-1 text-center font-black text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg text-sm"
+                oninput="syncSliderFromInput(this.value)">
+              <span class="font-black text-indigo-600 text-sm">%</span>
+            </div>
+          </div>
+          <input type="range" id="cardPctSlider" min="0" max="100" step="1" value="50" 
+            class="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            oninput="syncInputFromSlider(this.value)">
+          <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
+            <span>0% Impossible</span>
+            <span>50% Igual</span>
+            <span>100% Segur</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Argumentació / Justificació <span id="argRequiredLabel" class="text-rose-500 font-extrabold">* (Obligatòria en estimacions)</span>:
+          </label>
+          <textarea id="cardArgumentText" rows="3" placeholder="Explica el teu raonament o els factors que influeixen..." 
+            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-3 border-t border-slate-100">
+        <button id="removeFromLineBtn" onclick="removeActiveCardFromLine()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-xl transition">
+          Tornar a Pendents
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closePlaceModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl hover:bg-slate-200 transition">
+            Cancel·lar
+          </button>
+          <button onclick="saveCardPosition()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition">
+            Desar Posició
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GENERAR ENLLAÇ PER AL MESTRE (DEMANA NOM I COGOMS AQUÍ) -->
+  <div id="teacherLinkModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+          <i data-lucide="send" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Enllaç per al teu mestre/a</h3>
+          <p class="text-xs text-slate-500">Escriu el teu nom i cognoms per generar l'enllaç.</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 my-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nom i Cognoms de l'alumne/a *</label>
+          <input type="text" id="modalStudentName" placeholder="Ex: Marc Soler i Valls" 
+            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+      </div>
+
+      <div id="generatedLinkOutput" class="hidden my-3 p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+        <p class="text-[10px] font-bold text-emerald-600 mb-1">✓ ENLLAÇ CURT GENERAT I COPIAT AL PORTAPAPERS!</p>
+        <p id="shortUrlDisplay" class="text-[11px] font-mono text-slate-600 break-all bg-white p-2 rounded-lg border border-slate-200 select-all"></p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+        <button onclick="closeTeacherLinkModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl">Tancar</button>
+        <button onclick="confirmGenerateShortLink()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition">
+          Generar i Copiar Enllaç
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DEMANAR PISTA -->
+  <div id="hintModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
+          <i data-lucide="lightbulb" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-base font-extrabold text-slate-900">Pista d'Ajuda</h3>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed mb-4">
+        Recorda que en el <strong class="text-sky-700">Càlcul Teòric</strong> pots calcular la probabilitat exacta (Casos favorables / Casos possibles). Per exemple, un dau té 6 cares. En canvi, en l'<strong class="text-amber-700">Estimació Variable</strong>, el resultat depèn de factors com la meteorologia o la preparació, i per tant cal justificar-ho!
+      </p>
+      <div class="flex justify-end">
+        <button onclick="document.getElementById('hintModal').classList.add('hidden')" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl">Entesos!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR / AFEGIR AFIRMACIONS -->
+  <div id="editCardsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      <h3 class="text-base font-extrabold text-slate-900 mb-1">Afegir / Editar Afirmacions</h3>
+      <p class="text-xs text-slate-500 mb-4">Crea les teves pròpies targetes amb un emoji i el seu tipus.</p>
+
+      <div class="space-y-3">
+        <div class="flex gap-2">
+          <div class="w-20">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Emoji:</label>
+            <input type="text" id="newCardEmoji" value="🎲" maxlength="2" class="w-full p-3 text-center bg-slate-50 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Text de l'afirmació:</label>
+            <input type="text" id="newCardText" placeholder="Ex: Treure una suma de 10 amb dos daus..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tipus d'Esdeveniment:</label>
+          <select id="newCardType" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="Càlcul">🧮 Càlcul Teòric</option>
+            <option value="Estimació">🌤️️ Estimació Variable</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Percentatge Solució Teòrica (%):</label>
+          <input type="number" id="newCardExact" min="0" max="100" value="50" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 mt-6">
+        <button onclick="document.getElementById('editCardsModal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl">Cancel·lar</button>
+        <button onclick="addNewCustomCard()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl">Afegir Targeta</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TARGETES INICIALS
+    const INITIAL_9_CARDS = [
+      { id: 1, text: "Treure un 6 amb un dau normal", type: "Càlcul", emoji: "🎲", exactPct: 16.6, value: null, argument: "" },
+      { id: 2, text: "Treure vermell de la bossa de l'act. 1", type: "Càlcul", emoji: "🎒", exactPct: 50, value: null, argument: "" },
+      { id: 3, text: "Treure cara en llançar una moneda", type: "Càlcul", emoji: "🪙", exactPct: 50, value: null, argument: "" },
+      { id: 4, text: "El sol sortirà demà", type: "Càlcul", emoji: "☀️", exactPct: 100, value: null, argument: "" },
+      { id: 5, text: "Demà plourà", type: "Estimació", emoji: "🌧️", exactPct: 30, value: null, argument: "" },
+      { id: 6, text: "Treure un número parell amb un dau", type: "Càlcul", emoji: "🎲", exactPct: 50, value: null, argument: "" },
+      { id: 7, text: "Treure un 7 amb un dau de l'1 al 6", type: "Càlcul", emoji: "🚫", exactPct: 0, value: null, argument: "" },
+      { id: 8, text: "Veure avui un arc de Sant Martí", type: "Estimació", emoji: "🌈", exactPct: 10, value: null, argument: "" },
+      { id: 9, text: "El trimestre vinent tothom aprovarà les m...", type: "Estimació", emoji: "📐", exactPct: 80, value: null, argument: "" }
+    ];
+
+    let cards = [];
+    let selectedCardId = null;
+    let editingCardId = null;
+    let studentName = "";
+    let draggedCardId = null;
+
+    window.onload = function() {
+      cards = JSON.parse(JSON.stringify(INITIAL_9_CARDS));
+      checkTeacherUrl();
+      renderApp();
+    };
+
+    function checkTeacherUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nameParam = urlParams.get('n');
+      const dataParam = urlParams.get('d');
+      const customParam = urlParams.get('c');
+
+      if (customParam) {
+        try {
+          const customItems = customParam.split(';');
+          customItems.forEach(item => {
+            if (!item) return;
+            const [idStr, emoji, textEnc, type, exactStr] = item.split(',');
+            cards.push({
+              id: parseInt(idStr, 10),
+              text: decodeURIComponent(textEnc),
+              type: type,
+              emoji: emoji || '❓',
+              exactPct: parseFloat(exactStr) || 50,
+              value: null,
+              argument: ""
+            });
+          });
+        } catch(e) {}
+      }
+
+      if (nameParam && dataParam) {
+        studentName = decodeURIComponent(nameParam);
+        const items = dataParam.split('|');
+        items.forEach(item => {
+          if (!item) return;
+          const [idStr, valStr, argStr] = item.split(':');
+          const id = parseInt(idStr, 10);
+          const val = parseInt(valStr, 10);
+          const arg = argStr ? decodeURIComponent(argStr) : "";
+
+          const c = cards.find(card => card.id === id);
+          if (c) {
+            c.value = val;
+            c.argument = arg;
+          }
+        });
+
+        document.getElementById('teacherBanner').classList.remove('hidden');
+        document.getElementById('teacherStudentName').innerText = studentName;
+      }
+    }
+
+    function exitTeacherMode() {
+      window.location.href = window.location.pathname;
+    }
+
+    function renderApp() {
+      renderUnplacedCards();
+      renderPlacedCards();
+      updateCounters();
+      lucide.createIcons();
+    }
+
+    function updateCounters() {
+      const placed = cards.filter(c => c.value !== null).length;
+      const total = cards.length;
+      document.getElementById('placedCounter').innerText = `${placed}/${total}`;
+      document.getElementById('pendingBadge').innerText = total - placed;
+
+      const teacherStats = document.getElementById('teacherStatsText');
+      if (teacherStats) teacherStats.innerText = `${placed}/${total} Col·locades`;
+    }
+
+    function renderUnplacedCards() {
+      const container = document.getElementById('unplacedCardsContainer');
+      container.innerHTML = '';
+
+      const unplaced = cards.filter(c => c.value === null);
+
+      unplaced.forEach(card => {
+        const isSelected = (selectedCardId === card.id);
+        const badgeColor = card.type === 'Càlcul' 
+          ? 'bg-sky-100 text-sky-700 border-sky-200' 
+          : 'bg-amber-100 text-amber-700 border-amber-200';
+
+        const el = document.createElement('div');
+        el.draggable = true;
+        el.className = `draggable-card bg-white p-3.5 rounded-2xl border-2 ${isSelected ? 'border-indigo-600 bg-indigo-50/50 shadow-md scale-[1.02]' : 'border-slate-200/90 shadow-sm'} hover:shadow-md transition cursor-pointer flex flex-col justify-between gap-2.5 relative group`;
+        
+        el.ondragstart = (e) => handleDragStart(e, card.id);
+        el.onclick = () => selectCardToPlace(card.id);
+
+        el.innerHTML = `
+          <div class="flex items-start gap-2.5 pointer-events-none">
+            <div class="text-xl p-1 bg-slate-50 rounded-xl border border-slate-100">${card.emoji || '🎲'}</div>
+            <div class="space-y-1">
+              <p class="text-xs font-bold text-slate-800 leading-snug">${card.text}</p>
+              <span class="inline-block text-[9px] font-extrabold uppercase px-2 py-0.5 rounded border ${badgeColor}">${card.type}</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+
+      const hintEl = document.getElementById('activeSelectionHint');
+      if (selectedCardId) {
+        const selCard = cards.find(c => c.id === selectedCardId);
+        if (selCard && selCard.value === null) {
+          hintEl.innerText = `Targeta seleccionada: "${selCard.text.substring(0, 20)}...". Fes clic a la línia per situar-la!`;
+          hintEl.className = "text-[11px] font-bold text-indigo-600 animate-pulse";
+        }
+      } else {
+        hintEl.innerText = "Selecciona o arrossega una targeta.";
+        hintEl.className = "text-[11px] text-slate-400";
+      }
+    }
+
+    function renderPlacedCards() {
+      const container = document.getElementById('placedCardsContainer');
+      container.innerHTML = '';
+
+      const placed = cards.filter(c => c.value !== null);
+
+      if (placed.length === 0) {
+        container.innerHTML = `
+          <p id="emptyLineNotice" class="text-xs text-slate-400 italic text-center w-full my-auto">
+            Cap targeta situada encara. Fes clic a la línia o arrossega una targeta per situar-la.
+          </p>
+        `;
+        return;
+      }
+
+      placed.sort((a, b) => a.value - b.value);
+
+      placed.forEach(card => {
+        const badgeColor = card.type === 'Càlcul' 
+          ? 'bg-sky-100 text-sky-700' 
+          : 'bg-amber-100 text-amber-700';
+
+        const el = document.createElement('div');
+        el.className = "bg-white p-3 rounded-2xl border-2 border-indigo-200 shadow-sm hover:shadow hover:border-indigo-400 transition cursor-pointer flex flex-col gap-1 w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.33%-0.5rem)] lg:w-[calc(25%-0.5rem)] relative";
+        el.onclick = () => selectCardToPlace(card.id);
+
+        el.innerHTML = `
+          <div class="flex justify-between items-center gap-1">
+            <div class="flex items-center gap-1">
+              <span class="text-sm">${card.emoji || '🎲'}</span>
+              <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${badgeColor}">${card.type}</span>
+            </div>
+            <span class="text-xs font-black px-2 py-0.5 bg-indigo-600 text-white rounded-full">${card.value}%</span>
+          </div>
+          <p class="text-xs font-bold text-slate-800 mt-1">${card.text}</p>
+          ${card.argument ? `<p class="text-[10px] text-slate-600 bg-amber-50/60 p-1.5 rounded-lg border border-amber-100 italic mt-1 font-normal">"${card.argument}"</p>` : ''}
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    // DRAG AND DROP
+    function handleDragStart(e, id) {
+      draggedCardId = id;
+      selectedCardId = id;
+      e.dataTransfer.setData('text/plain', id);
+      renderUnplacedCards();
+    }
+
+    function allowDrop(e) {
+      e.preventDefault();
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      const id = draggedCardId || selectedCardId;
+      if (id) {
+        let pct = 50;
+        const rect = document.getElementById('axisBarContainer').getBoundingClientRect();
+        if (rect.width > 0) {
+          const clickX = e.clientX - rect.left;
+          pct = Math.round(Math.max(0, Math.min(100, (clickX / rect.width) * 100)));
+        }
+        selectCardToPlace(id, pct);
+      }
+      draggedCardId = null;
+    }
+
+    function selectCardToPlace(id, defaultPct = null) {
+      const card = cards.find(c => c.id === id);
+      if (!card) return;
+
+      if (card.value === null && defaultPct === null) {
+        selectedCardId = (selectedCardId === id) ? null : id;
+        renderUnplacedCards();
+        return;
+      }
+
+      editingCardId = id;
+      selectedCardId = id;
+
+      document.getElementById('cardModalTitle').innerText = (card.emoji ? card.emoji + ' ' : '') + card.text;
+      document.getElementById('cardModalBadge').innerText = card.type;
+      
+      const val = defaultPct !== null ? defaultPct : (card.value !== null ? card.value : 50);
+      document.getElementById('cardPctSlider').value = val;
+      document.getElementById('cardPctInput').value = val;
+      document.getElementById('cardArgumentText').value = card.argument || '';
+
+      const reqLabel = document.getElementById('argRequiredLabel');
+      if (card.type === 'Estimació') {
+        reqLabel.classList.remove('hidden');
+      } else {
+        reqLabel.classList.add('hidden');
+      }
+
+      const removeBtn = document.getElementById('removeFromLineBtn');
+      if (card.value === null) {
+        removeBtn.classList.add('hidden');
+      } else {
+        removeBtn.classList.remove('hidden');
+      }
+
+      document.getElementById('placeCardModal').classList.remove('hidden');
+    }
+
+    function syncSliderFromInput(val) {
+      let num = parseInt(val, 10);
+      if (isNaN(num)) num = 0;
+      if (num < 0) num = 0;
+      if (num > 100) num = 100;
+      document.getElementById('cardPctSlider').value = num;
+    }
+
+    function syncInputFromSlider(val) {
+      document.getElementById('cardPctInput').value = val;
+    }
+
+    function closePlaceModal() {
+      document.getElementById('placeCardModal').classList.add('hidden');
+      editingCardId = null;
+      selectedCardId = null;
+      renderUnplacedCards();
+    }
+
+    function saveCardPosition() {
+      const targetId = editingCardId || selectedCardId;
+      if (targetId === null) return;
+      const card = cards.find(c => c.id === targetId);
+      if (!card) return;
+
+      const argText = document.getElementById('cardArgumentText').value.trim();
+
+      if (card.type === 'Estimació' && !argText) {
+        alert("⚠️ Per a les targetes d'Estimació és obligatori escriure una argumentació/justificació!");
+        document.getElementById('cardArgumentText').focus();
+        return;
+      }
+
+      let val = parseInt(document.getElementById('cardPctInput').value, 10);
+      if (isNaN(val)) val = 50;
+      val = Math.max(0, Math.min(100, val));
+
+      card.value = val;
+      card.argument = argText;
+
+      closePlaceModal();
+      renderApp();
+    }
+
+    function removeActiveCardFromLine() {
+      const targetId = editingCardId || selectedCardId;
+      if (targetId === null) return;
+      const card = cards.find(c => c.id === targetId);
+      if (card) {
+        card.value = null;
+        card.argument = '';
+      }
+      closePlaceModal();
+      renderApp();
+    }
+
+    function handleAxisClick(e) {
+      let targetId = selectedCardId;
+      if (!targetId) {
+        const unplaced = cards.filter(c => c.value === null);
+        if (unplaced.length > 0) {
+          targetId = unplaced[0].id;
+        }
+      }
+
+      if (targetId) {
+        const rect = document.getElementById('axisBarContainer').getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const pct = Math.round(Math.max(0, Math.min(100, (clickX / rect.width) * 100)));
+        selectCardToPlace(targetId, pct);
+      }
+    }
+
+    function checkAnswers() {
+      const placed = cards.filter(c => c.value !== null);
+      if (placed.length === 0) {
+        alert("Primer situa algunes targetes a la línia!");
+        return;
+      }
+
+      let correct = 0;
+      placed.forEach(c => {
+        if (Math.abs(c.value - c.exactPct) <= 15) {
+          correct++;
+        }
+      });
+
+      const scoreEl = document.getElementById('scoreCounter');
+      scoreEl.innerText = `${correct}/${placed.length}`;
+      scoreEl.className = "text-xl font-black text-emerald-600 mt-1";
+
+      alert(`Avaluació: Has encertat o aproximat bé ${correct} de les ${placed.length} targetes situades!`);
+    }
+
+    function openHintModal() {
+      document.getElementById('hintModal').classList.remove('hidden');
+    }
+
+    function showSolution() {
+      if (confirm("Vols autocompletar la línia amb els valors de solució teòrics?")) {
+        cards.forEach(c => {
+          c.value = Math.round(c.exactPct);
+          if (c.type === 'Estimació' && !c.argument) {
+            c.argument = "Solució teòrica automàtica";
+          }
+        });
+        renderApp();
+      }
+    }
+
+    function resetActivity() {
+      if (confirm("Vols reiniciar tota l'activitat?")) {
+        cards = JSON.parse(JSON.stringify(INITIAL_9_CARDS));
+        selectedCardId = null;
+        editingCardId = null;
+        renderApp();
+      }
+    }
+
+    function openEditCardsModal() {
+      document.getElementById('editCardsModal').classList.remove('hidden');
+    }
+
+    function addNewCustomCard() {
+      const text = document.getElementById('newCardText').value.trim();
+      const emoji = document.getElementById('newCardEmoji').value.trim() || '🎲';
+      const type = document.getElementById('newCardType').value;
+      const exact = parseFloat(document.getElementById('newCardExact').value) || 50;
+
+      if (!text) {
+        alert("⚠️ Si us plau, escriu el text de l'afirmació.");
+        return;
+      }
+
+      const newId = cards.length > 0 ? Math.max(...cards.map(c => c.id)) + 1 : 1;
+
+      cards.push({
+        id: newId,
+        text: text,
+        type: type,
+        emoji: emoji,
+        exactPct: exact,
+        value: null,
+        argument: ""
+      });
+
+      document.getElementById('newCardText').value = '';
+      document.getElementById('editCardsModal').classList.add('hidden');
+      renderApp();
+    }
+
+    function openSendToTeacherModal() {
+      document.getElementById('teacherLinkModal').classList.remove('hidden');
+      document.getElementById('generatedLinkOutput').classList.add('hidden');
+      if (studentName) {
+        document.getElementById('modalStudentName').value = studentName;
+      }
+    }
+
+    function closeTeacherLinkModal() {
+      document.getElementById('teacherLinkModal').classList.add('hidden');
+    }
+
+    function confirmGenerateShortLink() {
+      const nameInput = document.getElementById('modalStudentName');
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        alert("⚠️ Si us plau, escriu el teu Nom i Cognoms.");
+        nameInput.focus();
+        return;
+      }
+
+      studentName = name;
+      const placed = cards.filter(c => c.value !== null);
+
+      if (placed.length === 0) {
+        alert("⚠️ Situa almenys una targeta abans de generar l'enllaç!");
+        return;
+      }
+
+      const compactData = placed.map(c => {
+        const argEnc = c.argument ? encodeURIComponent(c.argument.substring(0, 80)) : '';
+        return `${c.id}:${c.value}:${argEnc}`;
+      }).join('|');
+
+      const customCards = cards.filter(c => c.id > 9);
+      let customParam = '';
+      if (customCards.length > 0) {
+        customParam = '&c=' + customCards.map(c => `${c.id},${c.emoji},${encodeURIComponent(c.text)},${c.type},${c.exactPct}`).join(';');
+      }
+
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shortUrl = `${baseUrl}?n=${encodeURIComponent(studentName)}&d=${compactData}${customParam}`;
+
+      copyToClipboard(shortUrl);
+
+      document.getElementById('shortUrlDisplay').innerText = shortUrl;
+      document.getElementById('generatedLinkOutput').classList.remove('hidden');
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+    }
+  </script>
+</body>
+</html>
